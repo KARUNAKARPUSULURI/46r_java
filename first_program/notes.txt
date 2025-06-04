@@ -98,13 +98,9 @@ This will print the person details dynamically based on the input arguments.
 
 6. Simple Person Details Example Without Explicit Variables or Datatypes
 
-```java
 public class PersonDetails {
     public static void main(String[] data) {
         System.out.print("Name : ");
         System.out.println(data[0]);
     }
 }
-```
-
-Note: This example demonstrates basic code without explicit teaching of variables or datatypes. The main method takes an array parameter and prints the first element.
