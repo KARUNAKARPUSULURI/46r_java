@@ -1,0 +1,110 @@
+Java Development Kit (JDK) Installation and Concepts Notes
+
+1. What is JDK, JRE, and JVM?
+
+- JVM (Java Virtual Machine): It is an abstract machine that enables your computer to run a Java program. It converts bytecode into machine-specific code and executes it. JVM is platform-dependent.
+
+- JRE (Java Runtime Environment): It includes JVM and libraries required to run Java applications. It does not contain development tools like compilers.
+
+- JDK (Java Development Kit): It includes JRE plus development tools such as the Java compiler (javac), debugger, and other tools needed to develop Java applications.
+
+2. How to Install JDK Step by Step:
+
+Step 1: Download JDK
+- Go to the official Oracle website or OpenJDK website.
+- Download the latest JDK version suitable for your operating system.
+
+Step 3: Install JDK
+- Run the downloaded installer.
+- Follow the installation wizard instructions.
+- Choose the installation directory (default is usually fine).
+
+Step 4: Set Environment Variables (Windows)
+- Open System Properties > Advanced > Environment Variables.
+- Under System Variables, find "Path" and click Edit.
+- Add the path to the JDK's "bin" directory (e.g., C:\Program Files\Java\jdk-17\bin).
+- Click OK to save.
+
+Step 5: Verify Installation
+- Open Command Prompt.
+- Type `java -version` and press Enter.
+- Type `javac -version` and press Enter.
+- If both commands show version info, installation is successful.
+
+3. Sample Java Program: Hello World
+
+```java
+public class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello World");
+    }
+}
+```
+
+4. Static Person Details Example
+
+```java
+public class PersonDetails {
+    public static void main(String[] args) {
+        System.out.println("Name: " + name);
+        System.out.println("Age: " + age);
+        System.out.println("Gender: " + gender);
+        System.out.println("Email: " + email);
+        System.out.println("Phone Number: " + phoneNumber);
+    }
+}
+```
+
+Note: The above details are static, meaning they are fixed in the code and cannot be changed at runtime.
+
+5. Introducing Command Line Arguments (CLA)
+
+- Command line arguments allow passing data to the program at runtime.
+- The `main` method receives these arguments as a String array: `String[] args`.
+- Each element in `args` corresponds to an argument passed from the command line.
+
+Example using CLA to print person details dynamically:
+
+```java
+public class PersonDetails {
+    public static void main(String[] args) {
+
+        System.out.print("Name: ");
+        System.out.println(args[0]);
+
+        System.out.print("Age: ");
+        System.out.println(args[1]);
+
+        System.out.print("Gender: ");
+        System.out.println(args[2]);
+
+        System.out.print("Email: ");
+        System.out.println(args[3]);
+
+        System.out.print("Phone Number: ");
+        System.out.println(args[4]);
+    }
+}
+```
+
+Usage:
+- Compile the program: `javac PersonDetails.java`
+- Run the program with arguments:
+  `java PersonDetails John 30 Male john.doe@example.com 123-456-7890`
+
+This will print the person details dynamically based on the input arguments.
+
+---
+
+6. Simple Person Details Example Without Explicit Variables or Datatypes
+
+```java
+public class PersonDetails {
+    public static void main(String[] data) {
+        System.out.print("Name : ");
+        System.out.println(data[0]);
+    }
+}
+```
+
+Note: This example demonstrates basic code without explicit teaching of variables or datatypes. The main method takes an array parameter and prints the first element.
