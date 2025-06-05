@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Java Compilation & Execution Flow</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body, html {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8f9fa;
+    }
+
+    .container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .header {
+      background: white;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .controls {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .resume-btn {
+      background: #4285f4;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .resume-btn:hover {
+      background: #3367d6;
+    }
+
+    .step-indicators {
+      display: flex;
+      gap: 10px;
+    }
+
+    .step-indicator {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #e8eaed;
+      color: #5f6368;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .step-indicator.active {
+      background: #4285f4;
+      color: white;
+    }
+
+    .step-indicator.completed {
+      background: #34a853;
+      color: white;
+    }
+
+    .main-content {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .flow-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .flow-diagram {
+      position: relative;
+      width: 100%;
+      max-width: 1200px;
+      height: 600px;
+    }
+
+    .component {
+      position: absolute;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border: 2px solid #e8eaed;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transition: all 0.5s ease;
+      opacity: 0;
+      transform: scale(0.8);
+    }
+
+    .component.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .component.highlight {
+      border-color: #4285f4;
+      box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+    }
+
+    .source-code {
+      top: 50px;
+      left: 50px;
+      width: 200px;
+      height: 120px;
+      background: #e8f0fe;
+    }
+
+    .compiler {
+      top: 50px;
+      left: 350px;
+      width: 180px;
+      height: 120px;
+      background: #fef7e0;
+    }
+
+    .bytecode {
+      top: 50px;
+      right: 50px;
+      width: 200px;
+      height: 120px;
+      background: #e8f5e8;
+    }
+
+    .jvm-container {
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 500px;
+      height: 300px;
+      background: #f3e5f5;
+      border: 3px solid #9c27b0;
+    }
+
+    .jvm-title {
+      position: absolute;
+      top: -15px;
+      left: 20px;
+      background: white;
+      padding: 0 10px;
+      font-weight: 600;
+      color: #9c27b0;
+    }
+
+    .class-loader {
+      position: absolute;
+      top: 40px;
+      left: 20px;
+      width: 140px;
+      height: 80px;
+      background: #bbdefb;
+    }
+
+    .execution-engine {
+      position: absolute;
+      top: 40px;
+      right: 20px;
+      width: 140px;
+      height: 80px;
+      background: #c8e6c9;
+    }
+
+    .memory-area {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      height: 100px;
+      background: #ffccbc;
+    }
+
+    .output-box {
+      position: absolute;
+      bottom: 50px;
+      right: 50px;
+      width: 200px;
+      height: 80px;
+      background: #263238;
+      color: #4caf50;
+      font-family: 'Courier New', monospace;
+      font-size: 16px;
+      border-radius: 8px;
+    }
+
+    .component-title {
+      font-weight: 600;
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .component-subtitle {
+      font-size: 12px;
+      color: #666;
+      font-style: italic;
+    }
+
+    .arrow {
+      position: absolute;
+      color: #4285f4;
+      font-size: 24px;
+      font-weight: bold;
+      opacity: 0;
+      transition: all 0.5s ease;
+    }
+
+    .arrow.visible {
+      opacity: 1;
+    }
+
+    .arrow1 { top: 100px; left: 270px; }
+    .arrow2 { top: 100px; right: 270px; }
+    .arrow3 { top: 200px; left: 50%; transform: translateX(-50%) rotate(90deg); }
+    .arrow4 { bottom: 150px; right: 270px; }
+
+    .explanation {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #e3f2fd;
+      padding: 20px;
+      border-top: 3px solid #2196f3;
+      transform: translateY(100%);
+      transition: transform 0.5s ease;
+    }
+
+    .explanation.visible {
+      transform: translateY(0);
+    }
+
+    .explanation-title {
+      font-weight: 600;
+      color: #1976d2;
+      margin-bottom: 10px;
+    }
+
+    .explanation-text {
+      color: #333;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .code-content {
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      color: #333;
+      line-height: 1.2;
+      white-space: pre;
+    }
+
+    .bytecode-content {
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      color: #333;
+      line-height: 1.1;
+    }
+
+    .typing-animation {
+      overflow: hidden;
+      border-right: 2px solid #4caf50;
+      animation: typing 2s steps(15, end), blink-caret 0.75s step-end infinite;
+    }
+
+    @keyframes typing {
+      from { width: 0 }
+      to { width: 100% }
+    }
+
+    @keyframes blink-caret {
+      from, to { border-color: transparent }
+      50% { border-color: #4caf50 }
+    }
+
+    @media (max-width: 768px) {
+      .flow-diagram {
+        transform: scale(0.8);
+      }
+
+      .title {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="title">Java Compilation & Execution Flow</div>
+      <div class="controls">
+        <button class="resume-btn" onclick="startAnimation()">Resume</button>
+        <div class="step-indicators">
+          <div class="step-indicator active" data-step="1">1</div>
+          <div class="step-indicator" data-step="2">2</div>
+          <div class="step-indicator" data-step="3">3</div>
+          <div class="step-indicator" data-step="4">4</div>
+          <div class="step-indicator" data-step="5">5</div>
+          <div class="step-indicator" data-step="6">6</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="flow-container">
+        <div class="flow-diagram">
+          <div class="component source-code" id="sourceCode">
+            <div class="component-title">Source Code</div>
+            <div class="code-content">public class PersonDetails {
+  public static void main(String[] data) {
+    System.out.print("Hello worlttd ");
+  }
+}</div>
+          </div>
+
+          <div class="component compiler" id="compiler">
+            <div class="component-title">Java Compiler</div>
+            <div class="component-subtitle">(javac)</div>
+            <div style="margin-top: 10px; font-size: 12px;">
+              • Lexical Analysis<br>
+              • Syntax Checking<br>
+              • Code Generation
+            </div>
+          </div>
+
+          <div class="component bytecode" id="bytecode">
+            <div class="component-title">Bytecode</div>
+            <div class="bytecode-content">getstatic #2<br>ldc #3<br>invokevirtual #4<br>return</div>
+          </div>
+
+          <div class="component jvm-container" id="jvmContainer">
+            <div class="jvm-title">Java Virtual Machine (JVM)</div>
+            <div class="component class-loader" id="classLoader">
+              <div class="component-title" style="font-size: 14px;">Class Loader</div>
+              <div class="component-subtitle">Loading .class files</div>
+            </div>
+            <div class="component execution-engine" id="executionEngine">
+              <div class="component-title" style="font-size: 14px;">Execution Engine</div>
+              <div class="component-subtitle">Interpreting bytecode</div>
+            </div>
+            <div class="component memory-area" id="memoryArea">
+              <div class="component-title" style="font-size: 14px;">Memory Areas</div>
+              <div style="font-size: 11px; margin-top: 5px;">
+                Heap | Stack | Method Area | PC Register
+              </div>
+            </div>
+          </div>
+
+          <div class="component output-box" id="outputBox">
+            <div style="padding: 20px;">
+              <div style="color: #4caf50; font-size: 12px; margin-bottom: 10px;">Console Output:</div>
+              <div class="typing-animation" id="outputText" style="font-size: 14px;"></div>
+            </div>
+          </div>
+
+          <div class="arrow arrow1" id="arrow1">→</div>
+          <div class="arrow arrow2" id="arrow2">→</div>
+          <div class="arrow arrow3" id="arrow3">→</div>
+          <div class="arrow arrow4" id="arrow4">→</div>
+        </div>
+      </div>
+
+      <div class="explanation" id="explanation">
+        <div class="explanation-title" id="explanationTitle">Step 1: Source Code Analysis</div>
+        <div class="explanation-text" id="explanationText">
+          The developer writes Java source code in a .java file. The PersonDetails class contains a main method that prints "Hello worlttd " to the console.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentStep = 0;
+    const totalSteps = 6;
+    let animationTimeout;
+
+    const steps = [/*... same as your previous code ...*/];
+
+    function updateStepIndicators(step) {
+      document.querySelectorAll('.step-indicator').forEach((indicator, index) => {
+        indicator.classList.remove('active', 'completed');
+        if (index < step) indicator.classList.add('completed');
+        else if (index === step) indicator.classList.add('active');
+      });
+    }
+
+    function showStep(stepIndex) {
+      const step = steps[stepIndex];
+      document.querySelectorAll('.component, .arrow').forEach(el => {
+        el.classList.remove('visible', 'highlight');
+      });
+      step.components.forEach(componentId => {
+        const component = document.getElementById(componentId);
+        component.classList.add('visible');
+        if (componentId === step.components[step.components.length - 1]) {
+          setTimeout(() => component.classList.add('highlight'), 300);
+        }
+      });
+      step.arrows.forEach(arrowId => {
+        setTimeout(() => {
+          document.getElementById(arrowId).classList.add('visible');
+        }, 500);
+      });
+      document.getElementById('explanationTitle').textContent = step.title;
+      document.getElementById('explanationText').textContent = step.text;
+      document.getElementById('explanation').classList.add('visible');
+      updateStepIndicators(stepIndex);
+      if (stepIndex === 5) {
+        setTimeout(() => {
+          const outputText = document.getElementById('outputText');
+          outputText.textContent = 'Hello worlttd ';
+          outputText.style.width = 'auto';
+        }, 1000);
+      }
+    }
+
+    function nextStep() {
+      if (currentStep < totalSteps - 1) {
+        currentStep++;
+        showStep(currentStep);
+      } else {
+        currentStep = 0;
+        setTimeout(() => startAnimation(), 2000);
+      }
+    }
+
+    function startAnimation() {
+      clearTimeout(animationTimeout);
+      currentStep = 0;
+      document.querySelectorAll('.component, .arrow').forEach(el => {
+        el.classList.remove('visible', 'highlight');
+      });
+      document.getElementById('explanation').classList.remove('visible');
+      document.getElementById('outputText').textContent = '';
+      showStep(currentStep);
+      function scheduleNext() {
+        animationTimeout = setTimeout(() => {
+          nextStep();
+          if (currentStep < totalSteps - 1) {
+            scheduleNext();
+          }
+        }, 3000);
+      }
+      scheduleNext();
+    }
+
+    startAnimation();
+    setInterval(() => {
+      if (currentStep === 0) startAnimation();
+    }, totalSteps * 3000 + 5000);
+  </script>
+</body>
+</html>
