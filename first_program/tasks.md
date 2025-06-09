@@ -41,12 +41,3 @@ Write a Java program that prints the following employee information passed as co
 - Department
 - Position
 
-### Task 6: Print Detailed Person Profile 
-
-Write a Java program that prints the following person profile details passed as command line arguments:
-
-- Name
-- Age
-- Gender
-- Email
-- Phone Number
